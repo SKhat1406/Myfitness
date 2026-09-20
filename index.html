@@ -1,833 +1,611 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IronTrack - 6-Day Split Progression Tracker</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        dark: {
-                            bg: '#0f172a',
-                            card: '#1e293b',
-                            border: '#334155',
-                            hover: '#334155',
-                            accent: '#3b82f6'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        /* Custom scrollbar for gym dashboard feel */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 9999px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
-        }
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IRONTRACK - Workout & Progression</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --card-border: #1f293d;
+      --accent-blue: #2563eb;
+      --accent-blue-hover: #1d4ed8;
+      --accent-green: #10b981;
+      --accent-green-hover: #059669;
+      --accent-purple: #8b5cf6;
+      --accent-red: #ef4444;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --input-bg: #1f2937;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--text-main); padding: 12px; padding-bottom: 120px; -webkit-tap-highlight-color: transparent; }
+
+    header { display: flex; justify-content: space-between; align-items: center; padding: 8px 4px 16px 4px; }
+    .brand-title { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand-title span { color: var(--accent-blue); }
+
+    .header-btns { display: flex; gap: 6px; }
+    .btn-header { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .btn-header.primary { background: var(--accent-blue); border-color: var(--accent-blue); }
+
+    /* Day Selector Tabs */
+    .day-selector { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; scrollbar-width: none; }
+    .day-selector::-webkit-scrollbar { display: none; }
+    .day-btn { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-muted); padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+    .day-btn.active { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
+
+    /* Card Layout */
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 16px; margin-bottom: 14px; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .exercise-title { font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .target-badge { display: inline-block; background: #1e293b; color: #93c5fd; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 6px; }
+    
+    .card-actions { display: flex; gap: 6px; }
+    .btn-icon { background: #1e293b; border: 1px solid var(--card-border); color: var(--text-muted); border-radius: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
+    .btn-icon.danger { color: #f87171; border-color: #451a1a; }
+
+    /* Exercise Table */
+    .set-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .set-table th { text-align: center; font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; padding-bottom: 8px; }
+    .set-table td { padding: 4px 2px; text-align: center; }
+    .set-num { font-size: 13px; font-weight: 600; color: var(--text-muted); width: 12%; }
+    
+    .input-field { width: 90%; background: var(--input-bg); border: 1px solid var(--card-border); color: #fff; padding: 10px 4px; border-radius: 10px; font-size: 15px; font-weight: 700; text-align: center; outline: none; }
+    .input-field:focus { border-color: var(--accent-blue); }
+
+    .btn-check { background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-muted); border-radius: 10px; width: 42px; height: 40px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .btn-check.completed { background: var(--accent-green); color: #fff; border-color: var(--accent-green); }
+
+    .btn-add-set { width: 100%; background: transparent; border: 1px dashed var(--card-border); color: var(--text-muted); padding: 8px; border-radius: 10px; font-size: 12px; font-weight: 600; margin-top: 10px; cursor: pointer; }
+
+    /* Bottom Add Exercise Area */
+    .add-ex-container { margin-top: 16px; margin-bottom: 24px; }
+    .btn-add-ex { width: 100%; background: #1e293b; border: 1px solid var(--accent-blue); color: #93c5fd; padding: 14px; border-radius: 14px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+    /* Modal Styling */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; backdrop-filter: blur(4px); }
+    .modal-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; width: 100%; max-width: 500px; padding: 20px; max-height: 85vh; overflow-y: auto; }
+    .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+    .modal-field { margin-bottom: 12px; text-align: left; }
+    .modal-field label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+    .modal-input { width: 100%; background: var(--input-bg); border: 1px solid var(--card-border); color: #fff; padding: 12px; border-radius: 10px; font-size: 14px; outline: none; }
+
+    .modal-btn { width: 100%; background: var(--accent-blue); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 15px; margin-top: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .modal-btn.secondary { background: transparent; border: 1px solid var(--card-border); color: var(--text-main); }
+    .modal-btn.share { background: var(--accent-purple); }
+
+    /* Progress Analytics Widgets */
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .stat-card { background: #1e293b; padding: 12px; border-radius: 12px; border: 1px solid var(--card-border); }
+    .stat-val { font-size: 20px; font-weight: 800; color: #fff; margin-top: 4px; }
+    .stat-lbl { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+
+    .chart-container { background: #1e293b; padding: 12px; border-radius: 12px; border: 1px solid var(--card-border); margin-bottom: 16px; }
+    .chart-title { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }
+    canvas { width: 100% !important; height: 160px !important; }
+
+    .pr-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .pr-item { display: flex; justify-content: space-between; background: var(--input-bg); padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; }
+    .pr-item .weight { color: var(--accent-green); font-weight: 800; }
+
+    .history-item { background: var(--input-bg); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+    .history-header { display: flex; justify-content: space-between; font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+    .history-body { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
+    /* Local File View Code Area */
+    pre { background: var(--input-bg); padding: 12px; border-radius: 10px; font-size: 11px; color: #a7f3d0; overflow-x: auto; white-space: pre-wrap; word-break: break-all; max-height: 220px; }
+
+    /* Footer sticky bar */
+    .sticky-footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(11, 15, 22, 0.95); border-top: 1px solid var(--card-border); padding: 12px 16px; backdrop-filter: blur(10px); display: flex; gap: 10px; }
+    .btn-finish { flex: 1; background: var(--accent-green); color: #fff; border: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; }
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased pb-20 md:pb-6">
+<body>
 
-    <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3">
-        <div class="max-w-4xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-blue-600 text-white p-2 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                    <i class="fa-solid font-bold fa-dumbbell text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight tracking-wide text-white">IRON<span class="text-blue-500">TRACK</span></h1>
-                    <p class="text-xs text-slate-400">6-Day Hypertrophy & Progression</p>
-                </div>
-            </div>
-
-            <div class="flex items-center space-x-2">
-                <!-- Rest Timer Trigger -->
-                <button id="open-timer-btn" onclick="toggleTimerModal()" class="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 text-sm font-medium transition">
-                    <i class="fa-solid fa-stopwatch text-blue-400"></i>
-                    <span id="timer-display-header">Rest Timer</span>
-                </button>
-                <!-- View History Modal Trigger -->
-                <button onclick="openHistoryModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-lg border border-slate-700 transition" title="Workout History">
-                    <i class="fa-solid fa-clock-rotate-left"></i>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <main class="max-w-4xl mx-auto w-full px-4 pt-4 flex-grow">
-
-        <section class="mb-5">
-            <div class="flex space-x-2 overflow-x-auto pb-2 scrollbar-none" id="day-tabs">
-                <!-- Tabs will be rendered dynamically -->
-            </div>
-        </section>
-
-        <section id="day-header" class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 mb-6 shadow-xl relative overflow-hidden">
-            <div class="flex justify-between items-start relative z-10">
-                <div>
-                    <div class="flex items-center space-x-2 mb-1">
-                        <span id="active-day-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                            Monday
-                        </span>
-                        <span id="active-day-tag" class="text-xs text-slate-400">Heavy Focus</span>
-                    </div>
-                    <h2 id="active-day-title" class="text-2xl font-bold text-white tracking-tight">Heavy Chest & Upper Back</h2>
-                    <p id="active-day-desc" class="text-xs sm:text-sm text-slate-400 mt-1 max-w-xl">Focus on explosive pushing power and heavy compound rows. Keep standard rest times around 2-3 minutes for heavy lifts.</p>
-                </div>
-                <button onclick="finishWorkout()" class="hidden sm:flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-xl shadow-lg shadow-emerald-600/20 transition active:scale-95">
-                    <i class="fa-solid fa-check"></i>
-                    <span>Finish Session</span>
-                </button>
-            </div>
-        </section>
-
-        <section id="exercises-container" class="space-y-5">
-            <!-- Exercise Cards rendered via JS -->
-        </section>
-
-        <div class="mt-6 flex flex-col sm:flex-row gap-3">
-            <button onclick="openAddExerciseModal()" class="w-full py-3.5 border-2 border-dashed border-slate-800 hover:border-slate-700 bg-slate-900/40 hover:bg-slate-900 text-slate-400 hover:text-slate-200 rounded-2xl font-medium flex items-center justify-center space-x-2 transition">
-                <i class="fa-solid fa-plus text-sm"></i>
-                <span>Add Custom Exercise to Today</span>
-            </button>
-        </div>
-
-    </main>
-
-    <!-- Floating Mobile Finish Bar -->
-    <div class="sm:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 p-3 z-20 flex justify-between items-center px-4">
-        <div>
-            <div class="text-xs text-slate-400">Current Session</div>
-            <div class="text-sm font-semibold text-white" id="mobile-finished-counter">0 / 0 Sets Completed</div>
-        </div>
-        <button onclick="finishWorkout()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-600/20 transition active:scale-95 text-sm flex items-center space-x-2">
-            <i class="fa-solid fa-check"></i>
-            <span>Finish</span>
-        </button>
+  <header>
+    <div class="brand-title">Myfitness<span>TRACK</span></div>
+    <div class="header-btns">
+      <button class="btn-header primary" onclick="openModal('progressModal')">📈 Progress</button>
+      <button class="btn-header" onclick="openModal('filesModal')">📁 Files</button>
     </div>
+  </header>
 
-    <div id="timer-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl relative">
-            <button onclick="toggleTimerModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-            <div class="mb-4">
-                <div class="inline-flex p-3 bg-blue-500/10 text-blue-400 rounded-2xl mb-2">
-                    <i class="fa-solid fa-hourglass-half text-2xl"></i>
-                </div>
-                <h3 class="text-lg font-bold text-white">Rest Timer</h3>
-                <p class="text-xs text-slate-400">Target rest duration between working sets</p>
-            </div>
+  <!-- Day Navigation -->
+  <div class="day-selector" id="daySelector"></div>
 
-            <div class="text-5xl font-extrabold text-blue-400 font-mono tracking-wider my-6" id="timer-modal-clock">
-                01:30
-            </div>
+  <!-- Exercise List Area -->
+  <div id="exerciseContainer"></div>
 
-            <div class="grid grid-cols-4 gap-2 mb-6">
-                <button onclick="setTimerSeconds(60)" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded-lg font-medium">60s</button>
-                <button onclick="setTimerSeconds(90)" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded-lg font-medium">90s</button>
-                <button onclick="setTimerSeconds(120)" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded-lg font-medium">120s</button>
-                <button onclick="setTimerSeconds(180)" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded-lg font-medium">180s</button>
-            </div>
+  <!-- Add Exercise Button at Bottom -->
+  <div class="add-ex-container">
+    <button class="btn-add-ex" onclick="openModal('addExModal')">➕ Add Custom Exercise</button>
+  </div>
 
-            <div class="flex space-x-2">
-                <button id="timer-start-btn" onclick="toggleTimerRunning()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition">
-                    Start Timer
-                </button>
-                <button onclick="resetTimer()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-3 rounded-xl transition">
-                    Reset
-                </button>
-            </div>
+  <!-- Sticky Bottom Finish Bar -->
+  <div class="sticky-footer">
+    <button class="btn-finish" onclick="finishSession()">✓ Complete Workout Session</button>
+  </div>
+
+  <!-- MODAL: Add Custom Exercise -->
+  <div class="modal-overlay" id="addExModal">
+    <div class="modal-card">
+      <div class="modal-title">Add Exercise <span style="cursor:pointer" onclick="closeModal('addExModal')">✕</span></div>
+      <div class="modal-field">
+        <label>EXERCISE NAME</label>
+        <input type="text" id="newExName" class="modal-input" placeholder="e.g. Incline Dumbbell Press">
+      </div>
+      <div class="modal-field">
+        <label>TARGET REPS</label>
+        <input type="text" id="newExTarget" class="modal-input" placeholder="e.g. 3 × 8-10">
+      </div>
+      <div class="modal-field">
+        <label>INITIAL SETS COUNT</label>
+        <input type="number" id="newExSets" class="modal-input" value="3" min="1" max="10">
+      </div>
+      <button class="modal-btn" onclick="addCustomExercise()">Save Exercise</button>
+    </div>
+  </div>
+
+  <!-- MODAL: Progress & Analytics Tracker -->
+  <div class="modal-overlay" id="progressModal">
+    <div class="modal-card">
+      <div class="modal-title">Progress & Analytics <span style="cursor:pointer" onclick="closeModal('progressModal')">✕</span></div>
+      
+      <!-- Key Stats Summary -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-lbl">Total Workouts</div>
+          <div class="stat-val" id="statTotalWorkouts">0</div>
         </div>
-    </div>
-
-    <div id="add-exercise-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl relative">
-            <button onclick="closeAddExerciseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-            <h3 class="text-lg font-bold text-white mb-4">Add Custom Exercise</h3>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Exercise Name</label>
-                    <input type="text" id="custom-ex-name" placeholder="e.g. Incline Cable Fly" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Initial Sets</label>
-                        <input type="number" id="custom-ex-sets" value="3" min="1" max="10" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Target Reps</label>
-                        <input type="text" id="custom-ex-reps" value="10-12" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 focus:outline-none focus:border-blue-500">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Starting Weight (kg)</label>
-                    <input type="number" id="custom-ex-weight" value="20" step="0.5" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 focus:outline-none focus:border-blue-500">
-                </div>
-            </div>
-
-            <div class="mt-6 flex space-x-3">
-                <button onclick="saveCustomExercise()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition">
-                    Add Exercise
-                </button>
-            </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Lifetime Volume</div>
+          <div class="stat-val" id="statTotalVolume">0 kg</div>
         </div>
-    </div>
+      </div>
 
-    <div id="history-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl relative">
-            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-calendar-check text-blue-400 text-lg"></i>
-                    <h3 class="text-lg font-bold text-white">Workout Logs & History</h3>
-                </div>
-                <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
+      <!-- Volume Chart -->
+      <div class="chart-container">
+        <div class="chart-title">Volume Over Time (kg)</div>
+        <canvas id="volumeChart"></canvas>
+      </div>
 
-            <div id="history-list" class="overflow-y-auto space-y-4 pr-1 flex-grow">
-                <!-- History logged sessions will be injected here -->
-            </div>
-
-            <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
-                <span>Stored locally in browser</span>
-                <button onclick="clearHistory()" class="text-rose-400 hover:text-rose-300">Clear All History</button>
-            </div>
+      <!-- Personal Records -->
+      <div class="modal-field">
+        <label>PERSONAL RECORDS (MAX WEIGHT LIFTED)</label>
+        <div class="pr-list" id="prList">
+          <div style="font-size:12px; color:var(--text-muted);">No records logged yet. Complete workouts to calculate PRs!</div>
         </div>
+      </div>
+
+      <!-- Recent History Logs -->
+      <div class="modal-field">
+        <label>RECENT LOGGED SESSIONS</label>
+        <div id="historyList"></div>
+      </div>
+
+      <button class="modal-btn secondary" onclick="closeModal('progressModal')">Close</button>
     </div>
+  </div>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed top-5 right-5 z-50 bg-emerald-600 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-3 translate-y-[-150%] transition-transform duration-300">
-        <i class="fa-solid fa-circle-check text-lg"></i>
-        <span id="toast-msg" class="text-sm font-medium">Progress saved!</span>
+  <!-- MODAL: Local Files & CSV -->
+  <div class="modal-overlay" id="filesModal">
+    <div class="modal-card">
+      <div class="modal-title">Local Workout Files <span style="cursor:pointer" onclick="closeModal('filesModal')">✕</span></div>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Stored directly in your browser's local memory storage.</p>
+      <pre id="csvPreview">Loading data...</pre>
+      
+      <button class="modal-btn share" style="margin-top:12px" onclick="shareCSV()">📤 Share / Send CSV File</button>
+      <button class="modal-btn" style="margin-top:8px" onclick="downloadCSV()">⬇️ Save CSV File to Device</button>
+      <button class="modal-btn secondary" style="margin-top:8px" onclick="closeModal('filesModal')">Close</button>
     </div>
+  </div>
 
-    <script>
-        // 6-Day Split Master Routine Definition
-        const DEFAULT_ROUTINE = [
-            {
-                id: 'mon',
-                day: 'Monday',
-                badge: 'Monday',
-                title: 'Heavy Chest & Upper Back Focus',
-                description: 'Focus on explosive pushing power and heavy compound rows. Keep standard rest times around 2-3 minutes for heavy lifts.',
-                exercises: [
-                    { name: 'Bench Press', targetSets: 4, minReps: 6, maxReps: 8, repString: '6–8', weight: 30, sets: [] },
-                    { name: 'Incline DB Press', targetSets: 3, minReps: 8, maxReps: 10, repString: '8–10', weight: 16, sets: [] },
-                    { name: 'Lat Pulldown (Wide/Neutral)', targetSets: 4, minReps: 8, maxReps: 10, repString: '8–10', weight: 40, sets: [] },
-                    { name: 'Chest-Supported Row', targetSets: 3, minReps: 8, maxReps: 10, repString: '8–10', weight: 35, sets: [] },
-                    { name: 'High-to-Low Cable Fly', targetSets: 3, minReps: 12, maxReps: 15, repString: '12–15', weight: 12.5, sets: [] },
-                    { name: 'Straight-Arm Pulldown', targetSets: 3, minReps: 12, maxReps: 15, repString: '12–15', weight: 20, sets: [] }
-                ]
-            },
-            {
-                id: 'tue',
-                day: 'Tuesday',
-                badge: 'Tuesday',
-                title: 'Shoulder & Arm Hypertrophy',
-                description: 'Keep execution clean. Shoulder pressing and lateral delts high focus with controlled arm isolation.',
-                exercises: [
-                    { name: 'DB Shoulder Press', targetSets: 3, minReps: 8, maxReps: 10, repString: '8–10', weight: 14, sets: [] },
-                    { name: 'Lateral Raise (DB or Cable)', targetSets: 4, minReps: 12, maxReps: 15, repString: '12–15', weight: 8, sets: [] },
-                    { name: 'Reverse Pec Deck', targetSets: 3, minReps: 12, maxReps: 15, repString: '12–15', weight: 25, sets: [] },
-                    { name: 'Face Pull', targetSets: 3, minReps: 15, maxReps: 15, repString: '15', weight: 17.5, sets: [] },
-                    { name: 'EZ Bar Curl', targetSets: 3, minReps: 10, maxReps: 12, repString: '10–12', weight: 20, sets: [] },
-                    { name: 'Rope Tricep Pushdown', targetSets: 3, minReps: 12, maxReps: 15, repString: '12–15', weight: 17.5, sets: [] },
-                    { name: 'Incline DB Curl', targetSets: 2, minReps: 10, maxReps: 12, repString: '10–12', weight: 10, sets: [] },
-                    { name: 'Overhead Cable Extension', targetSets: 2, minReps: 12, maxReps: 15, repString: '12–15', weight: 15, sets: [] }
-                ]
-            },
-            {
-                id: 'wed',
-                day: 'Wednesday',
-                badge: 'Wednesday',
-                title: 'Active Recovery & Core',
-                description: 'Keep this day strictly light. Aerobic capacity, core stability, and mobility focus.',
-                exercises: [
-                    { name: 'Easy Cardio (Zone 2 Walk/Cycle)', targetSets: 1, minReps: 20, maxReps: 30, repString: '20–30 mins', weight: 0, sets: [] },
-                    { name: 'Hanging Leg Raises', targetSets: 3, minReps: 10, maxReps: 15, repString: '10–15', weight: 0, sets: [] },
-                    { name: 'Ab Wheel Rollouts / Planks', targetSets: 3, minReps: 10, maxReps: 12, repString: '10–12', weight: 0, sets: [] }
-                ]
-            },
-            {
-                id: 'thu',
-                day: 'Thursday',
-                badge: 'Thursday',
-                title: 'Back Priority Upper Body',
-                description: 'Back is prioritized early in the session with heavy vertical pulling and rows.',
-                exercises: [
-                    { name: 'Incline Barbell Press', targetSets: 3, minReps: 6, maxReps: 8, repString: '6–8', weight: 25, sets: [] },
-                    { name: 'Pull-ups', targetSets: 4, minReps: 6, maxReps: 10, repString: '6–10', weight: 0, sets: [] },
-                    { name: 'T-Bar Row', targetSets: 3, minReps: 8, maxReps: 10, repString: '8–10', weight: 30, sets: [] },
-                    { name: 'Machine Chest Press', targetSets: 3, minReps: 10, maxReps: 12, repString: '10–12', weight: 35, sets: [] },
-                    { name: 'One-Arm DB Row', targetSets: 3, minReps: 10, maxReps: 12, repString: '10–12', weight: 18, sets: [] },
-                    { name: 'Low-to-High Cable Fly', targetSets: 3, minReps: 12, maxReps: 15, repString: '12–15', weight: 10, sets: [] }
-                ]
-            },
-            {
-                id: 'fri',
-                day: 'Friday',
-                badge: 'Friday',
-                title: 'Shoulders & Arms Priority',
-                description: 'Heavy overhead press primary driver followed by arm hyper-focus.',
-                exercises: [
-                    { name: 'Standing Barbell OHP', targetSets: 3, minReps: 6, maxReps: 8, repString: '6–8', weight: 20, sets: [] },
-                    { name: 'Cable Lateral Raise', targetSets: 4, minReps: 12, maxReps: 15, repString: '12–15', weight: 6, sets: [] },
-                    { name: 'Reverse Pec Deck / Rear Cable Fly', targetSets: 3, minReps: 12, maxReps: 15, repString: '12–15', weight: 22.5, sets: [] },
-                    { name: 'Preacher Curl', targetSets: 3, minReps: 10, maxReps: 12, repString: '10–12', weight: 17.5, sets: [] },
-                    { name: 'Close-Grip Bench Press', targetSets: 3, minReps: 8, maxReps: 10, repString: '8–10', weight: 25, sets: [] },
-                    { name: 'Hammer Curl', targetSets: 3, minReps: 10, maxReps: 12, repString: '10–12', weight: 12, sets: [] },
-                    { name: 'Overhead Tricep Extension', targetSets: 3, minReps: 12, maxReps: 15, repString: '12–15', weight: 15, sets: [] }
-                ]
-            },
-            {
-                id: 'sat',
-                day: 'Saturday',
-                badge: 'Saturday',
-                title: 'Leg Hypertrophy & Strength',
-                description: 'Squat and posterior chain dominant. Ensure proper leg warmups before top sets.',
-                exercises: [
-                    { name: 'Back Squat', targetSets: 4, minReps: 6, maxReps: 8, repString: '6–8', weight: 40, sets: [] },
-                    { name: 'Romanian Deadlift (RDL)', targetSets: 3, minReps: 8, maxReps: 10, repString: '8–10', weight: 35, sets: [] },
-                    { name: 'Leg Press', targetSets: 3, minReps: 10, maxReps: 12, repString: '10–12', weight: 80, sets: [] },
-                    { name: 'Seated Leg Curl', targetSets: 3, minReps: 10, maxReps: 15, repString: '10–15', weight: 35, sets: [] },
-                    { name: 'Bulgarian Split Squat', targetSets: 3, minReps: 8, maxReps: 12, repString: '8–12', weight: 12, sets: [] },
-                    { name: 'Calf Raise', targetSets: 4, minReps: 12, maxReps: 15, repString: '12–15', weight: 40, sets: [] },
-                    { name: 'Reverse Crunch', targetSets: 3, minReps: 12, maxReps: 15, repString: '12–15', weight: 0, sets: [] }
-                ]
+  <script>
+    // Initial Default Routine Data Structure
+    const defaultRoutines = {
+      Monday: [
+        { name: "Bench Press", target: "4 × 6–8", sets: [ {kg: "", reps: "", done: false}, {kg: "", reps: "", done: false}, {kg: "", reps: "", done: false}, {kg: "", reps: "", done: false} ] },
+        { name: "Incline DB Press", target: "3 × 8–10", sets: [ {kg: "", reps: "", done: false}, {kg: "", reps: "", done: false}, {kg: "", reps: "", done: false} ] },
+        { name: "Lat Pulldown", target: "4 × 8–10", sets: [ {kg: "", reps: "", done: false}, {kg: "", reps: "", done: false}, {kg: "", reps: "", done: false}, {kg: "", reps: "", done: false} ] },
+        { name: "Chest-Supported Row", target: "3 × 8–10", sets: [ {kg: "", reps: "", done: false}, {kg: "", reps: "", done: false}, {kg: "", reps: "", done: false} ] },
+        { name: "High-to-Low Cable Fly", target: "3 × 12–15", sets: [ {kg: "", reps: "", done: false}, {kg: "", reps: "", done: false}, {kg: "", reps: "", done: false} ] },
+        { name: "Straight-Arm Pulldown", target: "3 × 12–15", sets: [ {kg: "", reps: "", done: false}, {kg: "", reps: "", done: false}, {kg: "", reps: "", done: false} ] }
+      ],
+      Tuesday: [
+        { name: "DB Shoulder Press", target: "3 × 8–10", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] },
+        { name: "Lateral Raise", target: "4 × 12–15", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] },
+        { name: "Reverse Pec Deck", target: "3 × 12–15", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] },
+        { name: "EZ Bar Curl", target: "3 × 10–12", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] },
+        { name: "Rope Tricep Pushdown", target: "3 × 12–15", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] }
+      ],
+      Wednesday: [
+        { name: "Easy Cardio (Zone 2)", target: "20-30 mins", sets: [{kg:"0",reps:"30",done:false}] },
+        { name: "Hanging Leg Raises", target: "3 × 10–15", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] }
+      ],
+      Thursday: [
+        { name: "Incline Barbell Press", target: "3 × 6–8", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] },
+        { name: "Pull-ups", target: "4 × 6–10", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] },
+        { name: "T-Bar Row", target: "3 × 8–10", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] },
+        { name: "Machine Chest Press", target: "3 × 10–12", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] }
+      ],
+      Friday: [
+        { name: "Standing Barbell OHP", target: "3 × 6–8", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] },
+        { name: "Cable Lateral Raise", target: "4 × 12–15", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] },
+        { name: "Preacher Curl", target: "3 × 10–12", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] },
+        { name: "Close-Grip Bench", target: "3 × 8–10", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] }
+      ],
+      Saturday: [
+        { name: "Back Squat", target: "4 × 6–8", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] },
+        { name: "Romanian Deadlift", target: "3 × 8–10", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] },
+        { name: "Leg Press", target: "3 × 10–12", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] },
+        { name: "Seated Leg Curl", target: "3 × 10–15", sets: [{kg:"",reps:"",done:false},{kg:"",reps:"",done:false},{kg:"",reps:"",done:false}] }
+      ]
+    };
+
+    let activeDay = "Monday";
+    let store = JSON.parse(localStorage.getItem('irontrack_store')) || { routines: defaultRoutines, logs: [] };
+
+    function init() {
+      renderDays();
+      renderExercises();
+    }
+
+    function renderDays() {
+      const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const container = document.getElementById('daySelector');
+      container.innerHTML = days.map(d => 
+        `<button class="day-btn ${d === activeDay ? 'active' : ''}" onclick="switchDay('${d}')">${d}</button>`
+      ).join('');
+    }
+
+    function switchDay(day) {
+      activeDay = day;
+      renderDays();
+      renderExercises();
+    }
+
+    function renderExercises() {
+      const container = document.getElementById('exerciseContainer');
+      const list = store.routines[activeDay] || [];
+
+      if (list.length === 0) {
+        container.innerHTML = `<div class="card" style="text-align:center; color: var(--text-muted);">No exercises for ${activeDay}. Tap below to add one!</div>`;
+        return;
+      }
+
+      container.innerHTML = list.map((ex, exIdx) => `
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="exercise-title">${ex.name}</div>
+              <span class="target-badge">Target: ${ex.target}</span>
+            </div>
+            <div class="card-actions">
+              <button class="btn-icon danger" title="Delete Exercise" onclick="deleteExercise(${exIdx})">🗑️</button>
+            </div>
+          </div>
+
+          <table class="set-table">
+            <thead>
+              <tr>
+                <th>Set</th>
+                <th>KG</th>
+                <th>Reps</th>
+                <th>Done</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${ex.sets.map((s, sIdx) => `
+                <tr>
+                  <td class="set-num">${sIdx + 1}</td>
+                  <td><input type="number" class="input-field" value="${s.kg}" placeholder="0" onchange="updateSet(${exIdx}, ${sIdx}, 'kg', this.value)"></td>
+                  <td><input type="number" class="input-field" value="${s.reps}" placeholder="0" onchange="updateSet(${exIdx}, ${sIdx}, 'reps', this.value)"></td>
+                  <td><button class="btn-check ${s.done ? 'completed' : ''}" onclick="toggleSet(${exIdx}, ${sIdx})">✓</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          
+          <div style="display:flex; gap:8px;">
+            <button class="btn-add-set" onclick="addSet(${exIdx})">+ Add Set</button>
+            ${ex.sets.length > 1 ? `<button class="btn-add-set" style="color:#f87171;" onclick="removeSet(${exIdx})">- Remove Set</button>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateSet(exIdx, sIdx, field, val) {
+      store.routines[activeDay][exIdx].sets[sIdx][field] = val;
+      saveLocal();
+    }
+
+    function toggleSet(exIdx, sIdx) {
+      const current = store.routines[activeDay][exIdx].sets[sIdx].done;
+      store.routines[activeDay][exIdx].sets[sIdx].done = !current;
+      saveLocal();
+      renderExercises();
+    }
+
+    function addSet(exIdx) {
+      const sets = store.routines[activeDay][exIdx].sets;
+      const lastSet = sets[sets.length - 1] || { kg: "", reps: "" };
+      sets.push({ kg: lastSet.kg, reps: lastSet.reps, done: false });
+      saveLocal();
+      renderExercises();
+    }
+
+    function removeSet(exIdx) {
+      store.routines[activeDay][exIdx].sets.pop();
+      saveLocal();
+      renderExercises();
+    }
+
+    function deleteExercise(exIdx) {
+      if (confirm(`Delete ${store.routines[activeDay][exIdx].name} from ${activeDay}?`)) {
+        store.routines[activeDay].splice(exIdx, 1);
+        saveLocal();
+        renderExercises();
+      }
+    }
+
+    function addCustomExercise() {
+      const name = document.getElementById('newExName').value.trim();
+      const target = document.getElementById('newExTarget').value.trim() || "3 × 8-12";
+      const setNum = parseInt(document.getElementById('newExSets').value) || 3;
+
+      if (!name) return alert("Please enter an exercise name.");
+
+      const newSets = [];
+      for (let i = 0; i < setNum; i++) {
+        newSets.push({ kg: "", reps: "", done: false });
+      }
+
+      if (!store.routines[activeDay]) store.routines[activeDay] = [];
+      store.routines[activeDay].push({ name, target, sets: newSets });
+
+      saveLocal();
+      closeModal('addExModal');
+      document.getElementById('newExName').value = '';
+      renderExercises();
+    }
+
+    function finishSession() {
+      const today = new Date().toISOString().split('T')[0];
+      const currentRoutine = store.routines[activeDay];
+      
+      // Calculate Session Total Volume
+      let totalVol = 0;
+      currentRoutine.forEach(ex => {
+        ex.sets.forEach(s => {
+          if (s.done || s.kg) {
+            totalVol += (parseFloat(s.kg) || 0) * (parseInt(s.reps) || 0);
+          }
+        });
+      });
+
+      const session = { 
+        date: today, 
+        day: activeDay, 
+        volume: totalVol,
+        exercises: JSON.parse(JSON.stringify(currentRoutine)) 
+      };
+      
+      store.logs.push(session);
+      
+      // Reset completed status for next time
+      store.routines[activeDay].forEach(ex => ex.sets.forEach(s => s.done = false));
+      saveLocal();
+
+      // Offer to Share Workout Summary
+      const shareTxt = formatShareText(session);
+      if (confirm(`Workout completed! Total Volume: ${totalVol} kg.\n\nWould you like to share this session summary?`)) {
+        shareWorkoutText(shareTxt);
+      }
+
+      renderExercises();
+    }
+
+    function formatShareText(session) {
+      let txt = `🏋️ IRONTRACK Workout Summary\n📅 Date: ${session.date} (${session.day})\n🔥 Volume: ${session.volume || 0} kg\n--------------------------\n`;
+      session.exercises.forEach(ex => {
+        const completedSets = ex.sets.filter(s => s.kg || s.reps);
+        if (completedSets.length > 0) {
+          txt += `• ${ex.name}:\n`;
+          completedSets.forEach((s, i) => {
+            txt += `   Set ${i+1}: ${s.kg || 0}kg × ${s.reps || 0} reps\n`;
+          });
+        }
+      });
+      txt += `\nTracked with IRONTRACK`;
+      return txt;
+    }
+
+    function shareWorkoutText(text) {
+      if (navigator.share) {
+        navigator.share({ title: 'Workout Summary', text: text }).catch(() => {});
+      } else {
+        copyToClipboard(text);
+        alert("Workout summary copied to clipboard! You can now paste it into WhatsApp or Messages.");
+      }
+    }
+
+    function copyToClipboard(text) {
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    }
+
+    function saveLocal() {
+      localStorage.setItem('irontrack_store', JSON.stringify(store));
+    }
+
+    function openModal(id) {
+      if (id === 'progressModal') renderProgressStats();
+      if (id === 'filesModal') generateCSVPreview();
+      document.getElementById(id).style.display = 'flex';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    function renderProgressStats() {
+      // Total stats
+      document.getElementById('statTotalWorkouts').textContent = store.logs.length;
+      
+      let lifetimeVol = 0;
+      const prs = {};
+
+      store.logs.forEach(log => {
+        lifetimeVol += log.volume || 0;
+        log.exercises.forEach(ex => {
+          ex.sets.forEach(s => {
+            const kg = parseFloat(s.kg) || 0;
+            if (kg > 0) {
+              if (!prs[ex.name] || kg > prs[ex.name]) {
+                prs[ex.name] = kg;
+              }
             }
-        ];
+          });
+        });
+      });
 
-        let activeDayIndex = 0;
-        let currentRoutine = JSON.parse(JSON.stringify(DEFAULT_ROUTINE));
-        let workoutLogs = [];
+      document.getElementById('statTotalVolume').textContent = `${lifetimeVol.toLocaleString()} kg`;
 
-        // Rest Timer variables
-        let timerSeconds = 90;
-        let timerMaxSeconds = 90;
-        let timerInterval = null;
-        let isTimerRunning = false;
+      // Render PRs
+      const prContainer = document.getElementById('prList');
+      const prKeys = Object.keys(prs);
+      if (prKeys.length === 0) {
+        prContainer.innerHTML = `<div style="font-size:12px; color:var(--text-muted);">No weight data recorded yet.</div>`;
+      } else {
+        prContainer.innerHTML = prKeys.map(k => `
+          <div class="pr-item">
+            <span>${k}</span>
+            <span class="weight">${prs[k]} kg</span>
+          </div>
+        `).join('');
+      }
 
-        // On Page Load Initialization
-        window.onload = function() {
-            loadSavedState();
-            initializeSetsIfNeeded();
-            renderDayTabs();
-            renderActiveDay();
-            setupRestTimerUI();
-        };
+      // Render Recent Logs
+      const histContainer = document.getElementById('historyList');
+      if (store.logs.length === 0) {
+        histContainer.innerHTML = `<div style="font-size:12px; color:var(--text-muted);">No history logged yet.</div>`;
+      } else {
+        histContainer.innerHTML = store.logs.slice().reverse().slice(0, 5).map(log => `
+          <div class="history-item">
+            <div class="history-header">
+              <span>${log.day} (${log.date})</span>
+              <span style="color:var(--accent-green);">${log.volume || 0} kg</span>
+            </div>
+            <div class="history-body">
+              ${log.exercises.map(e => `${e.name} (${e.sets.length} sets)`).join(', ')}
+            </div>
+            <button class="btn-add-set" style="margin-top:6px;" onclick="shareWorkoutText(formatShareText(store.logs[${store.logs.indexOf(log)}]))">📤 Share Session</button>
+          </div>
+        `).join('');
+      }
 
-        function loadSavedState() {
-            const savedRoutine = localStorage.getItem('irontrack_routine');
-            if (savedRoutine) {
-                try {
-                    currentRoutine = JSON.parse(savedRoutine);
-                } catch(e) {
-                    currentRoutine = JSON.parse(JSON.stringify(DEFAULT_ROUTINE));
-                }
+      renderVolumeChart();
+    }
+
+    function renderVolumeChart() {
+      const canvas = document.getElementById('volumeChart');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const logs = store.logs.slice(-7); // Last 7 sessions
+      if (logs.length < 2) {
+        ctx.fillStyle = "#9ca3af";
+        ctx.font = "12px sans-serif";
+        ctx.fillText("Log 2+ workouts to render volume graph", 20, 80);
+        return;
+      }
+
+      const padding = 30;
+      const w = canvas.width = canvas.offsetWidth;
+      const h = canvas.height = 160;
+
+      const maxVol = Math.max(...logs.map(l => l.volume || 100), 100);
+      
+      ctx.beginPath();
+      ctx.strokeStyle = "#2563eb";
+      ctx.lineWidth = 3;
+
+      logs.forEach((log, i) => {
+        const x = padding + (i / (logs.length - 1)) * (w - padding * 2);
+        const y = h - padding - ((log.volume || 0) / maxVol) * (h - padding * 2);
+
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+
+        // Draw points
+        ctx.fillStyle = "#60a5fa";
+        ctx.fillRect(x - 3, y - 3, 6, 6);
+      });
+
+      ctx.stroke();
+    }
+
+    function generateCSVPreview() {
+      let csv = "Date,Day,Exercise,Set,WeightKG,Reps\n";
+      store.logs.forEach(log => {
+        log.exercises.forEach(ex => {
+          ex.sets.forEach((s, i) => {
+            if (s.kg || s.reps) {
+              csv += `${log.date},${log.day},"${ex.name}",${i + 1},${s.kg || 0},${s.reps || 0}\n`;
             }
+          });
+        });
+      });
 
-            const savedLogs = localStorage.getItem('irontrack_history');
-            if (savedLogs) {
-                try {
-                    workoutLogs = JSON.parse(savedLogs);
-                } catch(e) {
-                    workoutLogs = [];
-                }
-            }
-        }
+      if (store.logs.length === 0) csv = "No completed sessions logged yet. Complete workouts to generate history.";
+      document.getElementById('csvPreview').textContent = csv;
+    }
 
-        function persistRoutineState() {
-            localStorage.setItem('irontrack_routine', JSON.stringify(currentRoutine));
-            updateMobileFinishedCounter();
-        }
+    function shareCSV() {
+      let csv = "Date,Day,Exercise,Set,WeightKG,Reps\n";
+      store.logs.forEach(log => {
+        log.exercises.forEach(ex => {
+          ex.sets.forEach((s, i) => {
+            csv += `${log.date},${log.day},"${ex.name}",${i + 1},${s.kg || 0},${s.reps || 0}\n`;
+          });
+        });
+      });
 
-        function initializeSetsIfNeeded() {
-            currentRoutine.forEach(day => {
-                day.exercises.forEach(ex => {
-                    if (!ex.sets || ex.sets.length === 0) {
-                        ex.sets = [];
-                        for (let i = 0; i < ex.targetSets; i++) {
-                            ex.sets.push({
-                                setNum: i + 1,
-                                weight: ex.weight || 0,
-                                reps: ex.minReps || 8,
-                                completed: false
-                            });
-                        }
-                    }
-                });
-            });
-        }
+      if (navigator.share) {
+        const file = new File([csv], `irontrack_log.csv`, { type: 'text/csv' });
+        navigator.share({ title: 'Workout Data CSV', files: [file] }).catch(() => downloadCSV());
+      } else {
+        downloadCSV();
+      }
+    }
 
-        function renderDayTabs() {
-            const tabsContainer = document.getElementById('day-tabs');
-            tabsContainer.innerHTML = '';
+    function downloadCSV() {
+      let csv = "Date,Day,Exercise,Set,WeightKG,Reps\n";
+      store.logs.forEach(log => {
+        log.exercises.forEach(ex => {
+          ex.sets.forEach((s, i) => {
+            csv += `${log.date},${log.day},"${ex.name}",${i + 1},${s.kg || 0},${s.reps || 0}\n`;
+          });
+        });
+      });
 
-            currentRoutine.forEach((dayObj, index) => {
-                const isActive = index === activeDayIndex;
-                const tabBtn = document.createElement('button');
-                tabBtn.className = `px-4 py-2 rounded-xl font-medium text-xs sm:text-sm whitespace-nowrap transition flex items-center space-x-2 ${
-                    isActive 
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-semibold' 
-                    : 'bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800'
-                }`;
-                
-                tabBtn.onclick = () => switchDay(index);
-                tabBtn.innerHTML = `
-                    <span>${dayObj.badge}</span>
-                `;
-                tabsContainer.appendChild(tabBtn);
-            });
-        }
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `irontrack_log_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
 
-        function switchDay(index) {
-            activeDayIndex = index;
-            renderDayTabs();
-            renderActiveDay();
-        }
-
-        function renderActiveDay() {
-            const dayData = currentRoutine[activeDayIndex];
-
-            document.getElementById('active-day-badge').innerText = dayData.day;
-            document.getElementById('active-day-title').innerText = dayData.title;
-            document.getElementById('active-day-desc').innerText = dayData.description;
-
-            const container = document.getElementById('exercises-container');
-            container.innerHTML = '';
-
-            dayData.exercises.forEach((ex, exIdx) => {
-                const isOverloadReady = checkProgressiveOverload(ex);
-
-                const exCard = document.createElement('div');
-                exCard.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-lg transition";
-
-                let overloadBadgeHtml = '';
-                if (isOverloadReady) {
-                    overloadBadgeHtml = `
-                        <div class="mt-2 inline-flex items-center space-x-1.5 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs px-2.5 py-1 rounded-lg animate-pulse font-medium">
-                            <i class="fa-solid fa-arrow-trend-up"></i>
-                            <span>Ready to increase weight! (Hit top reps across all sets)</span>
-                        </div>
-                    `;
-                }
-
-                exCard.innerHTML = `
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800/80 mb-3 gap-2">
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <h3 class="text-base sm:text-lg font-bold text-white tracking-tight">${ex.name}</h3>
-                                <span class="bg-slate-800 text-slate-400 text-xs px-2 py-0.5 rounded-md border border-slate-700">
-                                    Target: ${ex.repString} reps
-                                </span>
-                            </div>
-                            ${overloadBadgeHtml}
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="addSetToExercise(${exIdx})" class="text-xs text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-2.5 py-1 rounded-lg border border-blue-500/20 transition">
-                                <i class="fa-solid fa-plus text-[10px] mr-1"></i>Add Set
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Sets Table -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs sm:text-sm">
-                            <thead>
-                                <tr class="text-slate-500 border-b border-slate-800 text-[11px] uppercase tracking-wider">
-                                    <th class="py-2 px-2 w-12 text-center">Set</th>
-                                    <th class="py-2 px-2">Weight (kg)</th>
-                                    <th class="py-2 px-2">Reps</th>
-                                    <th class="py-2 px-2 w-16 text-center">Done</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-800/50" id="ex-sets-body-${exIdx}">
-                                ${renderSetsRows(ex, exIdx)}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-
-                container.appendChild(exCard);
-            });
-
-            updateMobileFinishedCounter();
-        }
-
-        function renderSetsRows(ex, exIdx) {
-            return ex.sets.map((set, setIdx) => {
-                const isCompleted = set.completed;
-                return `
-                    <tr class="hover:bg-slate-800/30 transition ${isCompleted ? 'bg-emerald-950/10' : ''}">
-                        <td class="py-2.5 px-2 text-center font-mono font-semibold ${isCompleted ? 'text-emerald-400' : 'text-slate-400'}">
-                            ${set.setNum}
-                        </td>
-                        <td class="py-2.5 px-2">
-                            <div class="flex items-center space-x-1">
-                                <input type="number" 
-                                       step="0.5" 
-                                       value="${set.weight}" 
-                                       onchange="updateSetInput(${exIdx}, ${setIdx}, 'weight', this.value)"
-                                       class="w-20 bg-slate-800 border ${isCompleted ? 'border-emerald-800/50 text-emerald-300' : 'border-slate-700 text-slate-100'} rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-mono text-center">
-                            </div>
-                        </td>
-                        <td class="py-2.5 px-2">
-                            <input type="number" 
-                                   value="${set.reps}" 
-                                   onchange="updateSetInput(${exIdx}, ${setIdx}, 'reps', this.value)"
-                                   class="w-20 bg-slate-800 border ${isCompleted ? 'border-emerald-800/50 text-emerald-300' : 'border-slate-700 text-slate-100'} rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-mono text-center">
-                        </td>
-                        <td class="py-2.5 px-2 text-center">
-                            <button onclick="toggleSetComplete(${exIdx}, ${setIdx})" 
-                                    class="w-8 h-8 rounded-xl flex items-center justify-center transition ${
-                                        isCompleted 
-                                        ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' 
-                                        : 'bg-slate-800 text-slate-500 hover:text-slate-300 border border-slate-700'
-                                    }">
-                                <i class="fa-solid fa-check text-xs"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function checkProgressiveOverload(exercise) {
-            if (!exercise.sets || exercise.sets.length === 0) return false;
-            // Check if all sets are completed and hit or exceed max target reps
-            const allCompleted = exercise.sets.every(s => s.completed);
-            const allHitMaxReps = exercise.sets.every(s => Number(s.reps) >= exercise.maxReps);
-            return allCompleted && allHitMaxReps;
-        }
-
-        function updateSetInput(exIdx, setIdx, field, value) {
-            const numVal = parseFloat(value) || 0;
-            currentRoutine[activeDayIndex].exercises[exIdx].sets[setIdx][field] = numVal;
-            persistRoutineState();
-            renderActiveDay();
-        }
-
-        function toggleSetComplete(exIdx, setIdx) {
-            const setObj = currentRoutine[activeDayIndex].exercises[exIdx].sets[setIdx];
-            setObj.completed = !setObj.completed;
-
-            if (setObj.completed) {
-                triggerAutoRestTimer();
-            }
-
-            persistRoutineState();
-            renderActiveDay();
-        }
-
-        function addSetToExercise(exIdx) {
-            const ex = currentRoutine[activeDayIndex].exercises[exIdx];
-            const lastSet = ex.sets[ex.sets.length - 1];
-            const newSetNum = ex.sets.length + 1;
-
-            ex.sets.push({
-                setNum: newSetNum,
-                weight: lastSet ? lastSet.weight : ex.weight,
-                reps: lastSet ? lastSet.reps : ex.minReps,
-                completed: false
-            });
-
-            persistRoutineState();
-            renderActiveDay();
-        }
-
-        function updateMobileFinishedCounter() {
-            const dayData = currentRoutine[activeDayIndex];
-            let totalSets = 0;
-            let completedSets = 0;
-
-            dayData.exercises.forEach(ex => {
-                ex.sets.forEach(s => {
-                    totalSets++;
-                    if (s.completed) completedSets++;
-                });
-            });
-
-            document.getElementById('mobile-finished-counter').innerText = `${completedSets} / ${totalSets} Sets Completed`;
-        }
-
-        function finishWorkout() {
-            const dayData = currentRoutine[activeDayIndex];
-            let totalCompleted = 0;
-            let totalVolume = 0;
-
-            dayData.exercises.forEach(ex => {
-                ex.sets.forEach(s => {
-                    if (s.completed) {
-                        totalCompleted++;
-                        totalVolume += (s.weight * s.reps);
-                    }
-                });
-            });
-
-            if (totalCompleted === 0) {
-                showToast("Please complete at least one set to save session!", "error");
-                return;
-            }
-
-            const logEntry = {
-                id: Date.now(),
-                date: new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }),
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                dayName: dayData.day,
-                title: dayData.title,
-                completedSets: totalCompleted,
-                totalVolumeKg: totalVolume,
-                exercises: JSON.parse(JSON.stringify(dayData.exercises))
-            };
-
-            workoutLogs.unshift(logEntry);
-            localStorage.setItem('irontrack_history', JSON.stringify(workoutLogs));
-
-            showToast(`Workout Saved! Volume: ${totalVolume.toLocaleString()} kg`);
-
-            // Reset completions for new session next time
-            dayData.exercises.forEach(ex => {
-                ex.sets.forEach(s => s.completed = false);
-            });
-            persistRoutineState();
-            renderActiveDay();
-        }
-
-        function openAddExerciseModal() {
-            document.getElementById('add-exercise-modal').classList.remove('hidden');
-        }
-
-        function closeAddExerciseModal() {
-            document.getElementById('add-exercise-modal').classList.add('hidden');
-        }
-
-        function saveCustomExercise() {
-            const name = document.getElementById('custom-ex-name').value.trim();
-            const setsNum = parseInt(document.getElementById('custom-ex-sets').value) || 3;
-            const repStr = document.getElementById('custom-ex-reps').value.trim() || '8–12';
-            const startWeight = parseFloat(document.getElementById('custom-ex-weight').value) || 0;
-
-            if (!name) {
-                showToast("Please enter exercise name", "error");
-                return;
-            }
-
-            // Parse reps for overload estimation
-            const repParts = repStr.split(/[-–]/);
-            const minReps = parseInt(repParts[0]) || 8;
-            const maxReps = parseInt(repParts[1]) || minReps;
-
-            const newEx = {
-                name: name,
-                targetSets: setsNum,
-                minReps: minReps,
-                maxReps: maxReps,
-                repString: repStr,
-                weight: startWeight,
-                sets: []
-            };
-
-            for (let i = 0; i < setsNum; i++) {
-                newEx.sets.push({
-                    setNum: i + 1,
-                    weight: startWeight,
-                    reps: minReps,
-                    completed: false
-                });
-            }
-
-            currentRoutine[activeDayIndex].exercises.push(newEx);
-            persistRoutineState();
-            renderActiveDay();
-            closeAddExerciseModal();
-            showToast("Custom exercise added!");
-
-            // Reset inputs
-            document.getElementById('custom-ex-name').value = '';
-        }
-
-        function openHistoryModal() {
-            const container = document.getElementById('history-list');
-            container.innerHTML = '';
-
-            if (workoutLogs.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-10 text-slate-500">
-                        <i class="fa-solid fa-folder-open text-3xl mb-2"></i>
-                        <p>No workout logs saved yet. Finish a workout to log history!</p>
-                    </div>
-                `;
-            } else {
-                workoutLogs.forEach(log => {
-                    const logCard = document.createElement('div');
-                    logCard.className = "bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4";
-                    
-                    let exDetailsHtml = log.exercises.map(ex => {
-                        const doneSets = ex.sets.filter(s => s.completed);
-                        if (doneSets.length === 0) return '';
-                        const setSummaries = doneSets.map(s => `${s.weight}kg × ${s.reps}`).join(', ');
-                        return `
-                            <div class="text-xs text-slate-300 py-1 border-b border-slate-700/40 last:border-none flex justify-between">
-                                <span class="font-medium text-slate-200">${ex.name}</span>
-                                <span class="font-mono text-slate-400">${setSummaries}</span>
-                            </div>
-                        `;
-                    }).join('');
-
-                    logCard.innerHTML = `
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <span class="text-xs text-blue-400 font-semibold uppercase tracking-wider">${log.dayName}</span>
-                                <h4 class="text-sm font-bold text-white">${log.title}</h4>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-xs text-slate-400 block">${log.date}</span>
-                                <span class="text-[11px] text-slate-500">${log.time}</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-4 my-2 py-1.5 px-3 bg-slate-900/50 rounded-xl text-xs text-slate-300 font-mono">
-                            <div>Sets Completed: <span class="text-emerald-400 font-bold">${log.completedSets}</span></div>
-                            <div>Total Vol: <span class="text-blue-400 font-bold">${log.totalVolumeKg.toLocaleString()} kg</span></div>
-                        </div>
-                        <div class="mt-2 space-y-1">
-                            ${exDetailsHtml}
-                        </div>
-                    `;
-                    container.appendChild(logCard);
-                });
-            }
-
-            document.getElementById('history-modal').classList.remove('hidden');
-        }
-
-        function closeHistoryModal() {
-            document.getElementById('history-modal').classList.add('hidden');
-        }
-
-        function clearHistory() {
-            if (confirm("Are you sure you want to clear all logged history?")) {
-                workoutLogs = [];
-                localStorage.removeItem('irontrack_history');
-                openHistoryModal();
-                showToast("Workout history cleared");
-            }
-        }
-
-        function setupRestTimerUI() {
-            updateTimerDisplay();
-        }
-
-        function toggleTimerModal() {
-            const modal = document.getElementById('timer-modal');
-            modal.classList.toggle('hidden');
-        }
-
-        function triggerAutoRestTimer() {
-            resetTimer();
-            startTimer();
-        }
-
-        function setTimerSeconds(sec) {
-            timerSeconds = sec;
-            timerMaxSeconds = sec;
-            updateTimerDisplay();
-        }
-
-        function updateTimerDisplay() {
-            const mins = Math.floor(timerSeconds / 60);
-            const secs = timerSeconds % 60;
-            const formatted = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            
-            document.getElementById('timer-modal-clock').innerText = formatted;
-            document.getElementById('timer-display-header').innerText = isTimerRunning ? formatted : 'Rest Timer';
-        }
-
-        function toggleTimerRunning() {
-            if (isTimerRunning) {
-                pauseTimer();
-            } else {
-                startTimer();
-            }
-        }
-
-        function startTimer() {
-            if (isTimerRunning) return;
-            isTimerRunning = true;
-            document.getElementById('timer-start-btn').innerText = 'Pause Timer';
-            document.getElementById('timer-start-btn').classList.replace('bg-blue-600', 'bg-amber-600');
-
-            timerInterval = setInterval(() => {
-                if (timerSeconds > 0) {
-                    timerSeconds--;
-                    updateTimerDisplay();
-                } else {
-                    pauseTimer();
-                    showToast("Rest time complete! Start your next set.", "info");
-                }
-            }, 1000);
-        }
-
-        function pauseTimer() {
-            isTimerRunning = false;
-            clearInterval(timerInterval);
-            document.getElementById('timer-start-btn').innerText = 'Start Timer';
-            document.getElementById('timer-start-btn').classList.replace('bg-amber-600', 'bg-blue-600');
-            updateTimerDisplay();
-        }
-
-        function resetTimer() {
-            pauseTimer();
-            timerSeconds = timerMaxSeconds;
-            updateTimerDisplay();
-        }
-
-        function showToast(message, type = "success") {
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toast-msg');
-            
-            toastMsg.innerText = message;
-            
-            if (type === "error") {
-                toast.classList.replace('bg-emerald-600', 'bg-rose-600');
-            } else {
-                toast.classList.replace('bg-rose-600', 'bg-emerald-600');
-            }
-
-            toast.classList.remove('translate-y-[-150%]');
-            
-            setTimeout(() => {
-                toast.classList.add('translate-y-[-150%]');
-            }, 3000);
-        }
-    </script>
+    init();
+  </script>
 </body>
 </html>
